@@ -1,0 +1,472 @@
+{
+  "format": "ShizukuFlow",
+  "version": 1,
+  "meta": {
+    "title": "サンプル",
+    "artist": "ShizukuFlow",
+    "created": "2026-10-31T07:05:35+08:00",
+    "modified": "2026-10-31T07:05:35+08:00",
+    "generator": "ShizukuFlow sample",
+    "accent": "#7fd4ff"
+  },
+  "canvas": {
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "background": "#050508",
+    "safe_area": {
+      "enabled": true,
+      "margin": 0.05
+    }
+  },
+  "media": {
+    "audio": null,
+    "reference": []
+  },
+  "timing": {
+    "bpm": 120,
+    "offset": 0,
+    "beats": [],
+    "downbeats": [],
+    "source": "manual"
+  },
+  "styles": [
+    {
+      "id": "main",
+      "font": "Noto Serif SC",
+      "weight": 900,
+      "size": 76,
+      "letter_spacing": 0.06,
+      "line_height": 1.1,
+      "fill": "#ffffff",
+      "y": 0.58,
+      "stroke": {
+        "color": "#000000",
+        "width": 6
+      },
+      "shadow": {
+        "offset": [
+          0,
+          4
+        ],
+        "blur": 10,
+        "color": "#00000080"
+      }
+    }
+  ],
+  "lyrics": [
+    {
+      "id": "L001",
+      "start": 2.0,
+      "end": 4.0,
+      "text": "ここに歌詞が入ります",
+      "syllables": [
+        {
+          "text": "こ",
+          "start": 2.0,
+          "end": 2.2
+        },
+        {
+          "text": "こ",
+          "start": 2.2,
+          "end": 2.4
+        },
+        {
+          "text": "に",
+          "start": 2.4,
+          "end": 2.6
+        },
+        {
+          "text": "歌",
+          "start": 2.6,
+          "end": 2.8
+        },
+        {
+          "text": "詞",
+          "start": 2.8,
+          "end": 3.0
+        },
+        {
+          "text": "が",
+          "start": 3.0,
+          "end": 3.2
+        },
+        {
+          "text": "入",
+          "start": 3.2,
+          "end": 3.4
+        },
+        {
+          "text": "り",
+          "start": 3.4,
+          "end": 3.6
+        },
+        {
+          "text": "ま",
+          "start": 3.6,
+          "end": 3.8
+        },
+        {
+          "text": "す",
+          "start": 3.8,
+          "end": 4.0
+        }
+      ],
+      "style": "main"
+    },
+    {
+      "id": "L002",
+      "start": 4.0,
+      "end": 6.0,
+      "text": "サンプルのテキストです",
+      "syllables": [
+        {
+          "text": "サ",
+          "start": 4.0,
+          "end": 4.182
+        },
+        {
+          "text": "ン",
+          "start": 4.182,
+          "end": 4.364
+        },
+        {
+          "text": "プ",
+          "start": 4.364,
+          "end": 4.545
+        },
+        {
+          "text": "ル",
+          "start": 4.545,
+          "end": 4.727
+        },
+        {
+          "text": "の",
+          "start": 4.727,
+          "end": 4.909
+        },
+        {
+          "text": "テ",
+          "start": 4.909,
+          "end": 5.091
+        },
+        {
+          "text": "キ",
+          "start": 5.091,
+          "end": 5.273
+        },
+        {
+          "text": "ス",
+          "start": 5.273,
+          "end": 5.455
+        },
+        {
+          "text": "ト",
+          "start": 5.455,
+          "end": 5.636
+        },
+        {
+          "text": "で",
+          "start": 5.636,
+          "end": 5.818
+        },
+        {
+          "text": "す",
+          "start": 5.818,
+          "end": 6.0
+        }
+      ],
+      "style": "main"
+    },
+    {
+      "id": "L003",
+      "start": 6.0,
+      "end": 8.0,
+      "text": "じゆうに書きかえてください",
+      "syllables": [
+        {
+          "text": "じ",
+          "start": 6.0,
+          "end": 6.154
+        },
+        {
+          "text": "ゆ",
+          "start": 6.154,
+          "end": 6.308
+        },
+        {
+          "text": "う",
+          "start": 6.308,
+          "end": 6.462
+        },
+        {
+          "text": "に",
+          "start": 6.462,
+          "end": 6.615
+        },
+        {
+          "text": "書",
+          "start": 6.615,
+          "end": 6.769
+        },
+        {
+          "text": "き",
+          "start": 6.769,
+          "end": 6.923
+        },
+        {
+          "text": "か",
+          "start": 6.923,
+          "end": 7.077
+        },
+        {
+          "text": "え",
+          "start": 7.077,
+          "end": 7.231
+        },
+        {
+          "text": "て",
+          "start": 7.231,
+          "end": 7.385
+        },
+        {
+          "text": "く",
+          "start": 7.385,
+          "end": 7.538
+        },
+        {
+          "text": "だ",
+          "start": 7.538,
+          "end": 7.692
+        },
+        {
+          "text": "さ",
+          "start": 7.692,
+          "end": 7.846
+        },
+        {
+          "text": "い",
+          "start": 7.846,
+          "end": 8.0
+        }
+      ],
+      "style": "main"
+    }
+  ],
+  "shots": [
+    {
+      "id": "S001",
+      "start": 0.0,
+      "end": 2.0,
+      "track": 0,
+      "lyric_refs": [],
+      "layers": {
+        "background": [
+          {
+            "part": "background",
+            "params": {
+              "kind": "aurora",
+              "color": "#07070b",
+              "color2": "#140a18",
+              "accent": "#7fd4ff",
+              "seed": 11,
+              "angle": 100
+            }
+          }
+        ],
+        "text": [
+          {
+            "part": "text",
+            "params": {
+              "text": "サンプル",
+              "x": 0.5,
+              "y": 0.46,
+              "size": 108,
+              "weight": 900,
+              "fill": "#ffffff",
+              "spacing": 10,
+              "stroke": {
+                "color": "#000000",
+                "width": 2
+              },
+              "shadow": {
+                "blur": 26,
+                "color": "#000000cc",
+                "offset": [
+                  0,
+                  6
+                ]
+              }
+            }
+          }
+        ],
+        "decor": [
+          {
+            "part": "frameLines",
+            "params": {
+              "margin": 0.05,
+              "color": "rgba(255,255,255,0.12)",
+              "width": 1.2
+            }
+          }
+        ],
+        "overlay": [
+          {
+            "part": "overlay",
+            "params": {
+              "kind": "grain",
+              "amount": 420,
+              "alpha": 0.05
+            }
+          }
+        ]
+      },
+      "motion": {
+        "entrance": null,
+        "hold": null,
+        "exit": null,
+        "camera": {
+          "part": "camera",
+          "params": {
+            "zoom": [
+              0.97,
+              1
+            ]
+          }
+        }
+      },
+      "transition": {
+        "part": "transition",
+        "params": {
+          "out": "fade",
+          "outDur": 0.25
+        }
+      },
+      "seed": 101,
+      "locked": false
+    },
+    {
+      "id": "S002",
+      "start": 2.0,
+      "end": 5.0,
+      "track": 0,
+      "lyric_refs": [
+        "L001",
+        "L002"
+      ],
+      "layers": {
+        "background": [
+          {
+            "part": "background",
+            "params": {
+              "kind": "grid",
+              "color": "#07070b",
+              "color2": "#0b1418",
+              "accent": "#7fd4ff",
+              "seed": 11,
+              "angle": 100
+            }
+          }
+        ],
+        "text": [
+          {
+            "part": "text",
+            "params": {
+              "text": "Lyrics",
+              "x": 0.5,
+              "y": 0.2,
+              "size": 34,
+              "weight": 500,
+              "fill": "rgba(255,255,255,0.55)",
+              "spacing": 8
+            }
+          }
+        ],
+        "decor": [
+          {
+            "part": "glowDot",
+            "params": {
+              "x": 0.5,
+              "y": 0.3,
+              "r": 4,
+              "color": "#7fd4ff"
+            }
+          }
+        ],
+        "overlay": []
+      },
+      "motion": {
+        "entrance": null,
+        "hold": null,
+        "exit": null,
+        "camera": {
+          "part": "camera",
+          "params": {
+            "zoom": [
+              1,
+              1.04
+            ]
+          }
+        }
+      },
+      "transition": null,
+      "seed": 202,
+      "locked": false
+    },
+    {
+      "id": "S003",
+      "start": 5.0,
+      "end": 10.0,
+      "track": 0,
+      "lyric_refs": [
+        "L003"
+      ],
+      "layers": {
+        "background": [
+          {
+            "part": "background",
+            "params": {
+              "kind": "gradient",
+              "color": "#07070b",
+              "color2": "#140a18",
+              "accent": "#7fd4ff",
+              "seed": 11,
+              "angle": 100
+            }
+          }
+        ],
+        "text": [],
+        "decor": [],
+        "overlay": []
+      },
+      "motion": {
+        "entrance": null,
+        "hold": null,
+        "exit": null,
+        "camera": null
+      },
+      "transition": null,
+      "seed": 303,
+      "locked": false
+    }
+  ],
+  "assets": [],
+  "export": {
+    "preset": "web-720p",
+    "video": {
+      "codec": "h264",
+      "crf": 18,
+      "preset": "medium",
+      "encoder": "auto"
+    },
+    "gif": {
+      "fps": 12,
+      "width": 640,
+      "dither": "sierra2_4a"
+    },
+    "apng": {
+      "fps": 24,
+      "colors": 256
+    }
+  }
+}

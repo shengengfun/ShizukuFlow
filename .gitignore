@@ -1,0 +1,69 @@
+# ── 前端 ──
+app/node_modules/
+app/dist/
+app/.vite/
+
+# ── Rust ──
+app/src-tauri/target/
+app/src-tauri/gen/
+
+# ── 自带工具链（二进制不入库，用 tools/fetch_ffmpeg.ps1 重建）──
+app/src-tauri/tools/*.exe
+app/src-tauri/tools/_ffmpeg_extract/
+
+# ── 构建产物 ──
+qt-shell/build/
+build/
+
+# ── 导出 / 截图产物 ──
+output/
+preview/
+*.flag
+*.log
+
+# ── 协作工具目录（团队会话、快照等，不入库）──
+.codebuddy/
+
+# ── 增量导出的分片缓存（纯临时产物，重导会自动重建）──
+.sfc_render/
+
+# ── 编译中间产物 ──
+*.a
+*.o
+*.obj
+*.d
+*.rlib
+*.rmeta
+*.make
+*.pdb
+
+# ── 二进制素材 / 压缩包 ──
+*.rar
+*.zip
+*.7z
+*.mp3
+*.mp4
+*.wav
+*.flac
+
+# ── 系统 ──
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ── 参考资产（各自是独立 git 仓库，不并入本仓库）──
+Aegisub/
+Aegisub-Motion/
+Chamina/
+JIZURA/
+JIZURA-AviUtl2/
+JIZURA-CN/
+KineTy/
+dsh-tool-jizura/
+jizura-helper-skill/
+jizura-sync/
+jpv-lyrics-motion-kit/
+karaoke-templates/
+pv-tool/
+sihaiwuzhou-pv/
+vocaloid-style-mv-pipeline/

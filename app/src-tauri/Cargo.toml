@@ -1,0 +1,33 @@
+[package]
+name = "shizukuflow"
+version = "0.1.0"
+description = "ShizukuFlow — 术曲风格文字 PV 制作工具"
+edition = "2021"
+rust-version = "1.77"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["image-png"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+# .sfp（zip 容器）读写
+zip = { version = "2", default-features = false, features = ["deflate"] }
+# 资源 sha1 校验
+sha1 = "0.10"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+# 沿用岚珠的取舍：thin LTO + 4 codegen units，体积接近完整 LTO 但构建快 3~4 倍
+codegen-units = 4
+lto = "thin"
+opt-level = "s"
+panic = "abort"
+strip = true

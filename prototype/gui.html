@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShizukuFlow — GUI 原型 v0.1</title>
+<script>document.documentElement.classList.add('dark');</script>
+<style>
+  /* ---- 浅色主题 ---- */
+  :root{
+    --bg:#f0f2f5; --panel:#ffffff; --panel-2:#f7f8fa; --panel-3:#e9ecf1;
+    --line:#d6dae1; --line-soft:#e4e7ec;
+    --tx:#1a1c21; --tx-2:#5a5f6b; --tx-3:#8b909c;
+    --accent:#01a3d4; --accent-dim:#01b7ed1f; --accent-ink:#ffffff;
+    --beat:#0d8fb0;
+    --stage:#0a0a0d;                 /* 预览舞台恒深色：视频内容的底色，不随主题变 */
+    --ok:#2e9e6b; --warn:#c08a22;
+    --mono:"Cascadia Mono","JetBrains Mono","Consolas",monospace;
+  }
+  /* ---- 深色主题（默认）---- */
+  html.dark{
+    --bg:#16161b; --panel:#1e1e25; --panel-2:#24242d; --panel-3:#2b2b35;
+    --line:#35353f; --line-soft:#2a2a33;
+    --tx:#e6e6ec; --tx-2:#9a9aa8; --tx-3:#6a6a78;
+    --accent:#3dd5ff; --accent-dim:#01b7ed33; --accent-ink:#0d1b21;
+    --beat:#5fd8e8;
+    --stage:#08080b;
+    --ok:#5ad19a; --warn:#e8b64c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--tx); overflow:hidden;
+    font:13px/1.5 "Segoe UI","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{display:flex;flex-direction:column;height:100vh}
+
+  /* ---------- 菜单栏 ---------- */
+  .menubar{
+    display:flex;align-items:center;gap:2px;height:32px;padding:0 8px;
+    background:var(--panel);border-bottom:1px solid var(--line);flex:none;
+  }
+  .menubar .logo{
+    font-weight:700;font-size:12.5px;letter-spacing:.3px;margin-right:14px;
+    color:var(--accent);display:flex;align-items:center;gap:6px;
+  }
+  .menubar .logo i{
+    width:9px;height:9px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 8px var(--accent);font-style:normal;
+  }
+  .menu{padding:4px 9px;border-radius:4px;color:var(--tx-2);cursor:default;font-size:12.5px}
+  .menu:hover{background:var(--panel-3);color:var(--tx)}
+  .menubar .spacer{flex:1}
+  .menubar .win{display:flex;gap:0}
+  .menubar .win b{
+    width:38px;height:24px;display:grid;place-items:center;font-weight:400;
+    color:var(--tx-3);font-size:13px;
+  }
+  .menubar .win b:hover{background:var(--panel-3);color:var(--tx)}
+
+  /* ---------- 工具栏 ---------- */
+  .toolbar{
+    display:flex;align-items:center;gap:6px;height:42px;padding:0 10px;
+    background:var(--panel-2);border-bottom:1px solid var(--line);flex:none;
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;
+    background:var(--panel-3);border:1px solid transparent;border-radius:5px;
+    color:var(--tx);cursor:pointer;font-size:12.5px;white-space:nowrap;
+    transition:background .12s,border-color .12s;
+  }
+  .btn:hover{background:#34343f}
+  .btn:active{background:#3c3c48}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);font-weight:600;border:none}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--tx-2)}
+  .btn.ghost:hover{background:var(--panel-3);color:var(--tx)}
+  .btn.sm{height:24px;padding:0 8px;font-size:11.5px}
+  .btn[disabled]{opacity:.4;pointer-events:none}
+  .tbseg{display:flex;background:var(--panel-3);border-radius:5px;overflow:hidden;flex:none}
+  .tbseg button{
+    height:26px;padding:0 9px;background:transparent;border:none;color:var(--tx-3);
+    cursor:pointer;font-size:12px;font-family:inherit;
+  }
+  .tbseg button:hover{color:var(--tx)}
+  .tbseg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+  .tb-sep{width:1px;height:18px;background:var(--line);margin:0 3px}
+  .tb-spacer{flex:1}
+  .tb-label{font-size:11.5px;color:var(--tx-3);margin-right:2px}
+  .chip{
+    height:22px;padding:0 8px;border-radius:11px;background:var(--panel-3);
+    color:var(--tx-2);font-size:11px;display:inline-flex;align-items:center;gap:5px;
+  }
+  .chip b{color:var(--tx);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+
+  /* ---------- 主工作区 ---------- */
+  .workspace{display:flex;flex:1;min-height:0}
+
+  /* 左：部件库 */
+  .library{
+    width:216px;flex:none;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;
+  }
+  .panel-hd{
+    height:30px;display:flex;align-items:center;padding:0 10px;
+    font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--tx-3);
+    border-bottom:1px solid var(--line-soft);text-transform:uppercase;flex:none;
+  }
+  .search{padding:8px;flex:none}
+  .search input{
+    width:100%;height:26px;padding:0 9px;background:var(--bg);
+    border:1px solid var(--line);border-radius:5px;color:var(--tx);
+    font-size:12px;font-family:inherit;
+  }
+  .search input:focus{outline:none;border-color:var(--accent)}
+  .search input::placeholder{color:var(--tx-3)}
+  .tagrow{display:flex;flex-wrap:wrap;gap:4px;padding:0 8px 8px;flex:none}
+  .tag{
+    padding:2px 7px;border-radius:9px;background:var(--panel-3);
+    font-size:10.5px;color:var(--tx-3);cursor:pointer;user-select:none;
+  }
+  .tag.on{background:var(--accent-dim);color:var(--accent);font-weight:600}
+  .cats{flex:1;overflow-y:auto;padding-bottom:8px}
+  .cat-hd{
+    display:flex;align-items:center;gap:6px;padding:5px 10px;cursor:pointer;
+    font-size:12px;color:var(--tx-2);user-select:none;
+  }
+  .cat-hd:hover{background:var(--panel-2)}
+  .cat-hd .arw{font-size:9px;color:var(--tx-3);transition:transform .15s;width:8px}
+  .cat-hd.open .arw{transform:rotate(90deg)}
+  .cat-hd .cnt{margin-left:auto;font-size:10px;color:var(--tx-3);font-family:var(--mono)}
+  .cat-items{display:none;padding:2px 0 4px}
+  .cat-items.open{display:block}
+  .part{
+    display:flex;align-items:center;gap:7px;padding:4px 10px 4px 24px;
+    font-size:11.5px;color:var(--tx-2);cursor:pointer;
+  }
+  .part:hover{background:var(--panel-2);color:var(--tx)}
+  .part.on{background:var(--accent-dim);color:var(--accent)}
+  .part .ico{
+    width:16px;height:12px;flex:none;border-radius:2px;background:var(--panel-3);
+    position:relative;overflow:hidden;
+  }
+  .part.on .ico{background:var(--accent)}
+
+  /* 中：预览 + 时间轴 */
+  .center{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+  .preview-wrap{
+    flex:1;min-height:0;display:flex;flex-direction:column;
+    padding:14px;gap:8px;
+  }
+  .pv-bar{
+    display:flex;align-items:center;gap:8px;flex:none;font-size:11.5px;color:var(--tx-3);
+  }
+  .pv-bar .seg{display:flex;background:var(--panel-2);border-radius:5px;overflow:hidden}
+  .pv-bar .seg button{
+    padding:3px 9px;background:transparent;border:none;color:var(--tx-3);
+    cursor:pointer;font-size:11.5px;font-family:inherit;
+  }
+  .pv-bar .seg button.on{background:var(--panel-3);color:var(--tx)}
+  .pv-bar .spacer{flex:1}
+  .pv-stage{
+    flex:1;min-height:0;display:grid;place-items:center;
+    background:var(--stage);border:1px solid var(--line);border-radius:6px;overflow:hidden;
+  }
+  #preview{display:block;max-width:100%;max-height:100%;background:#000}
+
+  /* 时间轴 */
+  /* 时间轴恒深色：波形必须在深底上才看得清，与主题无关（Audition / Aegisub 同） */
+  .timeline{
+    flex:none;height:214px;background:#1a1a20;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;
+  }
+  .tl-head{
+    height:32px;flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .tl-body{flex:1;display:flex;min-height:0}
+  .tl-labels{
+    width:96px;flex:none;border-right:1px solid #2a2a33;background:#1a1a20;
+  }
+  .tl-labels .lbl{
+    height:34px;display:flex;align-items:center;padding:0 9px;
+    font-size:10.5px;color:var(--tx-3);border-bottom:1px solid var(--line-soft);
+    letter-spacing:.3px;
+  }
+  .tl-labels .lbl.wave{height:78px;color:var(--tx-2)}
+  .tl-scroll{flex:1;overflow-x:auto;overflow-y:hidden;position:relative}
+  #tlCanvas{display:block;cursor:crosshair}
+  .tl-foot{
+    height:24px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px;
+    border-top:1px solid var(--line-soft);font-size:11px;color:var(--tx-3);
+    font-family:var(--mono);
+  }
+  .tl-foot .spacer{flex:1}
+
+  /* 右：检查器 */
+  .inspector{
+    width:268px;flex:none;background:var(--panel);border-left:1px solid var(--line);
+    display:flex;flex-direction:column;overflow-y:auto;
+  }
+  .ins-sec{border-bottom:1px solid var(--line-soft);padding:9px 11px 12px}
+  .ins-sec h4{
+    font-size:10.5px;font-weight:600;letter-spacing:.5px;color:var(--tx-3);
+    text-transform:uppercase;margin-bottom:9px;
+  }
+  .row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .row:last-child{margin-bottom:0}
+  .row label{width:56px;flex:none;font-size:11.5px;color:var(--tx-2)}
+  .row .val{
+    width:40px;flex:none;text-align:right;font-family:var(--mono);
+    font-size:11px;color:var(--tx);
+  }
+  input[type=range]{
+    flex:1;-webkit-appearance:none;height:3px;border-radius:2px;
+    background:var(--panel-3);outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:12px;height:12px;border-radius:50%;
+    background:var(--accent);cursor:pointer;border:2px solid var(--panel);
+  }
+  select,input[type=text],input[type=number]{
+    flex:1;height:24px;padding:0 7px;background:var(--bg);color:var(--tx);
+    border:1px solid var(--line);border-radius:4px;font-size:11.5px;font-family:inherit;
+  }
+  select:focus,input:focus{outline:none;border-color:var(--accent)}
+  .swatches{display:flex;gap:5px;flex-wrap:wrap}
+  .sw{
+    width:22px;height:22px;border-radius:4px;cursor:pointer;
+    border:2px solid transparent;
+  }
+  .sw.on{border-color:var(--tx)}
+  .ease-curve{
+    height:44px;background:var(--bg);border:1px solid var(--line);
+    border-radius:4px;margin-top:4px;display:block;width:100%;
+  }
+  .seedrow{display:flex;gap:5px;align-items:center}
+  .seedrow input{flex:1;font-family:var(--mono);font-size:11px}
+  .meta-list{font-size:11.5px}
+  .meta-list div{display:flex;justify-content:space-between;padding:3px 0;color:var(--tx-2)}
+  .meta-list b{color:var(--tx);font-weight:500;font-family:var(--mono);font-size:11px}
+
+  /* 状态栏 */
+  .statusbar{
+    height:24px;flex:none;display:flex;align-items:center;gap:14px;padding:0 11px;
+    background:var(--panel-2);border-top:1px solid var(--line);
+    font-size:11px;color:var(--tx-3);font-family:var(--mono);
+  }
+  .statusbar .spacer{flex:1}
+  .statusbar .ok{color:var(--ok)}
+
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#3a3a46;border-radius:5px}
+  ::-webkit-scrollbar-thumb:hover{background:#4a4a58}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 菜单栏 -->
+  <div class="menubar">
+    <div class="logo"><i></i>ShizukuFlow</div>
+    <div class="menu">文件</div><div class="menu">编辑</div><div class="menu">视图</div>
+    <div class="menu">时间轴</div><div class="menu">演出</div><div class="menu">渲染</div>
+    <div class="menu">工具</div><div class="menu">帮助</div>
+    <div class="spacer"></div>
+    <div class="win"><b>—</b><b>□</b><b>✕</b></div>
+  </div>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <button class="btn sm ghost">🗂 新建</button>
+    <button class="btn sm ghost">📂 打开</button>
+    <button class="btn sm ghost">💾 保存</button>
+    <div class="tb-sep"></div>
+    <button class="btn sm ghost">↶</button><button class="btn sm ghost">↷</button>
+    <div class="tb-sep"></div>
+    <button class="btn sm" id="btnRoll">🎲 换一个 <span style="color:var(--tx-3)">R</span></button>
+    <button class="btn sm ghost" id="btnLock">🔒 锁定镜头</button>
+    <div class="tb-sep"></div>
+    <span class="tb-label">吸附</span>
+    <select style="width:88px;height:26px" id="snapSel">
+      <option>节拍</option><option>小节</option><option>逐字</option><option>关闭</option>
+    </select>
+    <div class="tb-sep"></div>
+    <button class="btn sm ghost">🔍 检测 BPM</button>
+    <div class="tb-spacer"></div>
+    <div class="tbseg" id="themeSeg">
+      <button data-th="light" title="浅色主题">☀</button>
+      <button data-th="dark" class="on" title="深色主题（默认）">🌙</button>
+      <button data-th="system" title="跟随系统">⚙</button>
+    </div>
+    <div class="tb-sep"></div>
+    <span class="chip"><span class="dot"></span>工程 <b>残光.sf</b></span>
+    <span class="chip">1920×1080 · 30fps</span>
+    <div class="tb-sep"></div>
+    <button class="btn sm ghost">导出 ▾</button>
+    <button class="btn sm primary">发送到岚珠工具箱</button>
+  </div>
+
+  <!-- 工作区 -->
+  <div class="workspace">
+
+    <!-- 部件库 -->
+    <aside class="library">
+      <div class="panel-hd">演出部件库</div>
+      <div class="search"><input placeholder="搜索部件…" id="partSearch"></div>
+      <div class="tagrow">
+        <span class="tag on">全部</span><span class="tag">文字PV系</span>
+        <span class="tag">动能</span><span class="tag">Glitch</span>
+        <span class="tag">和风</span><span class="tag">Horror</span>
+      </div>
+      <div class="cats" id="cats"></div>
+    </aside>
+
+    <!-- 中间 -->
+    <main class="center">
+      <div class="preview-wrap">
+        <div class="pv-bar">
+          <div class="seg">
+            <button class="on">演出</button><button>安全框</button>
+            <button>三分构图</button><button>网格</button>
+          </div>
+          <div class="seg">
+            <button class="on" id="fxReal">实时</button>
+            <button id="fx2">2帧定格</button><button id="fx3">3帧定格</button>
+          </div>
+          <div class="spacer"></div>
+          <span>缩放 <b id="zoomTxt" style="color:var(--tx)">适应</b></span>
+          <span style="color:var(--tx-3)">|</span>
+          <span>镜头 <b id="shotTxt" style="color:var(--accent)">S004</b> / 012</span>
+        </div>
+        <div class="pv-stage"><canvas id="preview" width="960" height="540"></canvas></div>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-head">
+          <button class="btn sm ghost" id="btnPlay">▶ 播放</button>
+          <button class="btn sm ghost">⏮</button><button class="btn sm ghost">⏭</button>
+          <div class="tb-sep"></div>
+          <button class="btn sm ghost">I 入点</button>
+          <button class="btn sm ghost">O 出点</button>
+          <button class="btn sm ghost">K 值分割</button>
+          <div class="tb-sep"></div>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--tx)" id="tcDisp">00:12.340</span>
+          <div class="tb-spacer"></div>
+          <span class="tb-label">缩放</span>
+          <input type="range" id="zoom" min="20" max="400" value="100" style="width:96px">
+          <span id="zoomVal" style="font-family:var(--mono);font-size:11px;width:38px">1.0×</span>
+        </div>
+        <div class="tl-body">
+          <div class="tl-labels">
+            <div class="lbl">节拍 BEATS</div>
+            <div class="lbl">歌词 LYRICS</div>
+            <div class="lbl">分镜 SHOTS</div>
+            <div class="lbl wave">波形 AUDIO</div>
+            <div class="lbl">特效 FX</div>
+          </div>
+          <div class="tl-scroll" id="tlScroll">
+            <canvas id="tlCanvas" height="214"></canvas>
+          </div>
+        </div>
+        <div class="tl-foot">
+          <span>BPM <b style="color:var(--beat)">140</b></span>
+          <span>偏移 +120ms</span>
+          <span>|</span>
+          <span>选区 12.340 → 13.100（0.760s）</span>
+          <span class="spacer"></span>
+          <span>逐字 K 值：已标注 4 / 12 行</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- 检查器 -->
+    <aside class="inspector">
+      <div class="panel-hd">检查器 · 镜头 S004</div>
+
+      <div class="ins-sec">
+        <h4>文字</h4>
+        <div class="row"><label>字体</label>
+          <select><option>Noto Serif SC 900</option><option>思源黑体 Heavy</option><option>霞鹜文楷</option></select>
+        </div>
+        <div class="row"><label>字号</label>
+          <input type="range" id="pSize" min="40" max="200" value="108"><span class="val" id="vSize">108</span>
+        </div>
+        <div class="row"><label>字距</label>
+          <input type="range" id="pTrack" min="-100" max="100" value="-8"><span class="val" id="vTrack">-.08</span>
+        </div>
+        <div class="row"><label>行高</label>
+          <input type="range" id="pLead" min="80" max="200" value="112"><span class="val" id="vLead">1.12</span>
+        </div>
+        <div class="row"><label>描边</label>
+          <input type="range" id="pStroke" min="0" max="20" value="5"><span class="val" id="vStroke">5</span>
+        </div>
+        <div class="row"><label>主色</label>
+          <div class="swatches">
+            <div class="sw on" style="background:#ffffff"></div>
+            <div class="sw" style="background:#ffe08a"></div>
+            <div class="sw" style="background:#ff6b9d"></div>
+            <div class="sw" style="background:#4dd0e1"></div>
+            <div class="sw" style="background:#8be08b"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ins-sec">
+        <h4>运动</h4>
+        <div class="row"><label>入场</label>
+          <select><option>slide.up 上滑</option><option>cut.hard 硬切</option><option>scale.pop 弹入</option><option>mask.wipe 遮罩擦除</option></select>
+        </div>
+        <div class="row"><label>时长</label>
+          <input type="range" id="pDur" min="4" max="60" value="18"><span class="val" id="vDur">.18</span>
+        </div>
+        <div class="row"><label>缓动</label>
+          <select id="easeSel"><option>expo.out</option><option>back.out</option><option>linear</option><option>steps(3)</option></select>
+        </div>
+        <canvas class="ease-curve" id="easeCv" width="244" height="44"></canvas>
+        <div class="row" style="margin-top:8px"><label>相机</label>
+          <input type="range" id="pCam" min="0" max="100" value="18"><span class="val" id="vCam">.18</span>
+        </div>
+      </div>
+
+      <div class="ins-sec">
+        <h4>画面效果</h4>
+        <div class="row"><label>颗粒</label>
+          <input type="range" id="pGrain" min="0" max="100" value="8"><span class="val" id="vGrain">.08</span>
+        </div>
+        <div class="row"><label>色差</label>
+          <input type="range" id="pChrom" min="0" max="100" value="12"><span class="val" id="vChrom">.12</span>
+        </div>
+        <div class="row"><label>暗角</label>
+          <input type="range" id="pVig" min="0" max="100" value="30"><span class="val" id="vVig">.30</span>
+        </div>
+        <div class="row"><label>扫描线</label>
+          <input type="range" id="pScan" min="0" max="100" value="0"><span class="val" id="vScan">.00</span>
+        </div>
+      </div>
+
+      <div class="ins-sec">
+        <h4>随机种子</h4>
+        <div class="seedrow">
+          <input type="text" id="seedInput" value="84213">
+          <button class="btn sm ghost" id="btnRoll2" style="height:24px">🎲</button>
+        </div>
+        <div style="font-size:10.5px;color:var(--tx-3);margin-top:6px;line-height:1.45">
+          种子固化进 .sf，保证任何机器上重渲结果一致
+        </div>
+      </div>
+
+      <div class="ins-sec">
+        <h4>工程信息</h4>
+        <div class="meta-list">
+          <div><span>格式</span><b>ShizukuFlow v1</b></div>
+          <div><span>时长</span><b>03:46.00</b></div>
+          <div><span>镜头数</span><b>012</b></div>
+          <div><span>歌词行</span><b>012</b></div>
+          <div><span>资产</span><b>07</b></div>
+          <div><span>工具链</span><b style="color:var(--ok)">LANZHUTOOL_TOOLS</b></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 状态栏 -->
+  <div class="statusbar">
+    <span>就绪</span>
+    <span>|</span>
+    <span>帧 <b id="stFrame" style="color:var(--tx)">370</b> / 6780</span>
+    <span>|</span>
+    <span>预览 <b style="color:var(--tx)">960×540</b>（半分辨率）</span>
+    <span>|</span>
+    <span class="ok">● ffmpeg 已就绪</span>
+    <span class="spacer"></span>
+    <span>自动保存 已开启</span>
+    <span>|</span>
+    <span>渲染队列 空闲</span>
+  </div>
+</div>
+
+<script>
+/* ================= 演示数据 ================= */
+const BPM = 140, BEAT = 60/BPM;
+const DUR = 226;                       // 3:46
+const lyrics = [
+  {id:'L001', start:12.34, end:15.10, text:'我还记得黎明的颜色'},
+  {id:'L002', start:15.10, end:18.20, text:'远处响起渐渐散去的声音'},
+  {id:'L003', start:18.20, end:21.30, text:'现在还来得及吗'},
+  {id:'L004', start:21.30, end:24.60, text:'不想就这样透明地结束'},
+];
+/* 樱坂雫应援色 #01B7ED（水蓝）—— 取自岚珠工具箱 appearance.ts 的虹咲 13 人配色表 */
+const SHIZUKU = '#01B7ED';
+const styles = [
+  {name:'mono',    bg:'#0a0a0f', fg:'#ffffff', acc:SHIZUKU,   layout:'center',   deco:'rule'},
+  {name:'split',   bg:'#101018', fg:'#f2f2f5', acc:'#4dd0e1', layout:'left',     deco:'block'},
+  {name:'editorial',bg:'#f2efe9',fg:'#141416', acc:'#c8402f', layout:'topleft',  deco:'frame'},
+  {name:'horror',  bg:'#08080a', fg:'#d8d8dc', acc:'#8b1e2d', layout:'scatter',  deco:'noise'},
+  {name:'vapor',   bg:'#1a0b2e', fg:'#ffd6f5', acc:'#00e5ff', layout:'center',   deco:'grid'},
+];
+
+/* 主题相关：canvas 里拿不到 CSS 变量，所以显式维护一份 RGB。
+   深色下提亮（与岚珠 applyAccent 的 `l+16` 一致），保证深底上不糊。 */
+let THEME='dark';
+const ACC_RGB={ dark:[61,213,255], light:[1,163,212] };
+const acc=(a=1)=>`rgba(${ACC_RGB[THEME].join(',')},${a})`;
+let cur = {t:12.34, playing:false, style:0, seed:84213, zoom:1.0, hold:12};
+
+/* 检查器参数（滑块驱动的实时参数） */
+const P = {size:108, track:-8, lead:112, stroke:5, dur:18, cam:18, grain:8, chrom:12, vig:30, scan:0};
+
+/* ================= 部件库 ================= */
+const CATS = [
+  ['布局 Layout',   18, ['hero.center 居中主字','split.duo 双分','column.vertical 竖排','grid.3x3 九宫','stagger 阶梯','frame.rule 规则框','edge.push 贴边','radial 放射','type.wall 字墙','track.left 左轨']],
+  ['登场 Entrance', 12, ['slide.up 上滑','cut.hard 硬切','scale.pop 弹入','mask.wipe 擦除','glitch.in 故障入场','type.write 逐字写入','blur.in 聚焦','flip.x 翻转']],
+  ['保持 Hold',     8,  ['micro.drift 微漂移','pulse.beat 节拍脉冲','flicker 闪烁','breathe 呼吸','jitter 抖动','shake.hold 持续震']],
+  ['退场 Exit',     10, ['cut.hard 硬切','fade.out 淡出','slide.down 下滑','scale.collapse 塌陷','glitch.out 故障退','mask.split 分裂']],
+  ['装饰 Decor',    14, ['frame.rule 细线框','cross.mark 十字','grid.dot 点阵','line.flow 流线','burst.ray 放射线','blob.organic 有机形','wave.ocean 海浪','golden.spiral 黄金螺旋']],
+  ['文字加工 Type', 9,  ['outline 描边','stroke.fill 描边填充','layer.echo 重影','glow 辉光','slice.text 切片','vertical.sub 竖排副文','mask.reveal 遮罩']],
+  ['背景 Backdrop', 8,  ['solid 纯色','gradient 渐变','triangle.grid 三角网格','checker 棋盘','noise.film 胶片颗粒','image.plate 图版']],
+  ['相机 Camera',   7,  ['push.in 推近','pull.out 拉远','pan.x 横移','tilt.y 纵移','roll 滚转','shake 震动','zoom.punch 冲击']],
+  ['画面效果 FX',   9,  ['grain 颗粒','chroma 色差','vignette 暗角','scanline 扫描线','glitch.slice 切片故障','halftone 半调','invert 反相','bloom 辉光']],
+  ['转场 Transition',8, ['cut 硬切','slice.h 横向切割','slice.v 纵向切割','wipe 擦除','flash 闪白','glitch.cut 故障切','push 推移']],
+];
+const catsEl = document.getElementById('cats');
+CATS.forEach(([name,cnt,items],ci)=>{
+  const hd=document.createElement('div'); hd.className='cat-hd'+(ci<3?' open':'');
+  hd.innerHTML=`<span class="arw">▶</span><span>${name}</span><span class="cnt">${cnt}</span>`;
+  const box=document.createElement('div'); box.className='cat-items'+(ci<3?' open':'');
+  items.forEach((p,i)=>{
+    const el=document.createElement('div'); el.className='part'+(ci===0&&i===0?' on':'');
+    el.innerHTML=`<span class="ico"></span><span>${p}</span>`;
+    el.onclick=()=>{
+      box.querySelectorAll('.part').forEach(x=>x.classList.remove('on'));
+      document.querySelectorAll('.part').forEach(x=>x.classList.remove('on'));
+      el.classList.add('on');
+    };
+    box.appendChild(el);
+  });
+  hd.onclick=()=>{hd.classList.toggle('open');box.classList.toggle('open');};
+  catsEl.appendChild(hd); catsEl.appendChild(box);
+});
+
+/* ================= 缓动曲线预览 ================= */
+const EASES={
+  'expo.out':t=>t===1?1:1-Math.pow(2,-10*t),
+  'back.out':t=>{const c=1.70158;return 1+ (c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2);},
+  'linear':t=>t,
+  'steps(3)':t=>Math.floor(t*3)/3,
+};
+const easeCv=document.getElementById('easeCv'), ex=easeCv.getContext('2d');
+function drawEase(){
+  const w=easeCv.width,h=easeCv.height; ex.clearRect(0,0,w,h);
+  ex.strokeStyle='#2a2a33'; ex.lineWidth=1;
+  for(let i=1;i<4;i++){ex.beginPath();ex.moveTo(w*i/4,0);ex.lineTo(w*i/4,h);ex.moveTo(0,h*i/4);ex.lineTo(w,h*i/4);ex.stroke();}
+  const f=EASES[document.getElementById('easeSel').value]||EASES['expo.out'];
+  ex.strokeStyle=SHIZUKU; ex.lineWidth=2; ex.beginPath();
+  for(let i=0;i<=60;i++){const t=i/60;const x=t*(w-8)+4,y=h-6-f(t)*(h-12);
+    i?ex.lineTo(x,y):ex.moveTo(x,y);}
+  ex.stroke();
+}
+
+/* ================= 波形 ================= */
+// 生成有节拍感的伪波形峰值（0~1）
+const SPS=40;                              // 每秒采样点
+const peaks=new Float32Array(Math.ceil(DUR*SPS));
+(function genWave(){
+  for(let i=0;i<peaks.length;i++){
+    const t=i/SPS;
+    const bar=Math.floor(t/(BEAT*4));      // 每 4 拍一个段落
+    const inBar=(t%(BEAT*4))/(BEAT*4);
+    const kick=Math.pow(1-inBar,2.2)*0.85; // 小节首拍重音
+    const beat=Math.abs(Math.sin(t*Math.PI/BEAT))*0.35;
+    const body=(Math.sin(t*0.7)+Math.sin(t*1.9+1)+Math.sin(t*3.3+2))/3*0.22+0.3;
+    const sec=1-Math.min(1,Math.abs(((t/56)%2)-1));  // 段落起伏
+    const n=((Math.sin(i*12.9898)*43758.5453)%1+1)%1;
+    peaks[i]=Math.min(1,(kick+beat+body)*(0.55+sec*0.6)*(0.85+n*0.3));
+  }
+})();
+
+/* ================= 时间轴绘制 ================= */
+const tl=document.getElementById('tlCanvas'), tx=tl.getContext('2d');
+const SCROLL=document.getElementById('tlScroll');
+let TLW=0, TLH=214;
+const TRACKS={beat:0, lyric:34, shot:68, wave:102, fx:180};
+
+function layoutTL(){
+  TLW=SCROLL.clientWidth; tl.width=TLW*devicePixelRatio; tl.style.width=TLW+'px';
+  tl.height=TLH*devicePixelRatio; tl.style.height=TLH+'px';
+  tx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+}
+function timeToX(t){ return (t-cur.t)*cur.zoom*46 + TLW*0.42; }
+function xToTime(x){ return (x-TLW*0.42)/(cur.zoom*46)+cur.t; }
+
+function drawTL(){
+  const w=TLW,h=TLH, px=cur.zoom*46;      // 每秒像素
+  tx.clearRect(0,0,w,h);
+  tx.fillStyle='#1a1a20'; tx.fillRect(0,0,w,h);
+
+  // 秒刻度
+  const t0=xToTime(0), t1=xToTime(w);
+  const step= px<26?10 : px<70?5 : px<160?2 : 1;
+  tx.strokeStyle='#26262e'; tx.lineWidth=1; tx.beginPath();
+  for(let s=Math.floor(t0/step)*step; s<=t1; s+=step){
+    const x=timeToX(s); tx.moveTo(x,0); tx.lineTo(x,h);
+  }
+  tx.stroke();
+
+  // --- 节拍轨 ---
+  const by=TRACKS.beat, bh=34;
+  tx.fillStyle='#191920'; tx.fillRect(0,by,w,bh);
+  for(let b=Math.floor(t0/BEAT)*BEAT; b<=t1; b+=BEAT){
+    const x=timeToX(b), isDown=Math.abs((b/BEAT)%4)<0.01;
+    tx.strokeStyle=isDown?'#4dd0e1':'#33404a';
+    tx.lineWidth=isDown?1.5:1;
+    tx.beginPath(); tx.moveTo(x,by+4); tx.lineTo(x,by+bh-4); tx.stroke();
+    if(isDown && px>30){ tx.fillStyle='#4dd0e1'; tx.font='9px '+getComputedStyle(document.body).fontFamily;
+      tx.fillText(Math.round(b/BEAT/4)+1, x+3, by+13); }
+  }
+
+  // --- 歌词轨 ---
+  const ly=TRACKS.lyric, lh=34;
+  tx.fillStyle='#1c1c23'; tx.fillRect(0,ly,w,lh);
+  lyrics.forEach((L,i)=>{
+    const x=timeToX(L.start), ww=(L.end-L.start)*px;
+    if(x+ww<0||x>w) return;
+    const isCur=cur.t>=L.start&&cur.t<L.end;
+    tx.fillStyle=isCur?acc(.2):'#2e2e39';
+    tx.fillRect(x+1,ly+5,Math.max(2,ww-2),lh-10);
+    tx.strokeStyle=isCur?acc(1):'#3a3a46'; tx.lineWidth=1;
+    tx.strokeRect(x+1.5,ly+5.5,Math.max(2,ww-3),lh-11);
+    if(ww>42){ tx.fillStyle=isCur?'#cdefff':'#9a9aa8'; tx.font='11px "Microsoft YaHei",sans-serif';
+      tx.fillText(L.text.slice(0,Math.floor(ww/11)), x+6, ly+21); }
+  });
+
+  // --- 分镜轨 ---
+  const sy=TRACKS.shot, sh=34;
+  tx.fillStyle='#1c1c23'; tx.fillRect(0,sy,w,sh);
+  for(let i=0;i<12;i++){
+    const st=12.34+i*2.4, en=st+2.4;
+    const x=timeToX(st), ww=(en-st)*px;
+    if(x+ww<0||x>w) continue;
+    const isCur=cur.t>=st&&cur.t<en;
+    tx.fillStyle=isCur?'#4dd0e144':'#2b2b35';
+    tx.fillRect(x+1,sy+8,Math.max(2,ww-2),sh-16);
+    if(ww>34){ tx.fillStyle=isCur?'#bff0f7':'#6a6a78'; tx.font='10px monospace';
+      tx.fillText('S'+String(i+1).padStart(3,'0'), x+5, sy+22); }
+  }
+
+  // --- 波形轨 ---
+  const wy=TRACKS.wave, wh=78, mid=wy+wh/2;
+  tx.fillStyle='#15151b'; tx.fillRect(0,wy,w,wh);
+  const i0=Math.max(0,Math.floor(t0*SPS)), i1=Math.min(peaks.length-1,Math.ceil(t1*SPS));
+  if(px/SPS>1.1){                                  // 采样级：逐柱
+    for(let i=i0;i<=i1;i++){
+      const x=timeToX(i/SPS), v=peaks[i]*(wh/2-6);
+      tx.fillStyle='#7c6bf5'; tx.fillRect(x,mid-v,Math.max(1,px/SPS-0.5),v);
+      tx.fillStyle=SHIZUKU;   tx.fillRect(x,mid,Math.max(1,px/SPS-0.5),v*0.62);
+    }
+  }else{                                           // 概览级：取区间最大包络
+    tx.beginPath();
+    for(let x=0;x<w;x+=1){
+      const a=Math.floor(xToTime(x)*SPS), b=Math.floor(xToTime(x+1)*SPS);
+      let m=0; for(let i=a;i<=Math.max(a,b);i++) if(peaks[i]>m) m=peaks[i];
+      tx.lineTo(x, mid-m*(wh/2-6));
+    }
+    for(let x=w-1;x>=0;x-=1){
+      const a=Math.floor(xToTime(x)*SPS), b=Math.floor(xToTime(x+1)*SPS);
+      let m=0; for(let i=a;i<=Math.max(a,b);i++) if(peaks[i]>m) m=peaks[i];
+      tx.lineTo(x, mid+m*(wh/2-6)*0.62);
+    }
+    tx.closePath(); tx.fillStyle='#6a5ae0'; tx.fill();
+  }
+  tx.strokeStyle='#2a2a33'; tx.beginPath(); tx.moveTo(0,mid); tx.lineTo(w,mid); tx.stroke();
+
+  // 选中区间的 K 值（逐字）标记
+  const L=lyrics.find(l=>cur.t>=l.start&&cur.t<l.end);
+  if(L&&px>60){
+    const n=Math.min(L.text.length,8);
+    for(let k=1;k<n;k++){
+      const kt=L.start+(L.end-L.start)*k/n, x=timeToX(kt);
+      tx.strokeStyle=acc(.72); tx.lineWidth=1; tx.setLineDash([2,2]);
+      tx.beginPath(); tx.moveTo(x,ly+5); tx.lineTo(x,ly+lh-5); tx.stroke(); tx.setLineDash([]);
+    }
+  }
+
+  // --- 特效轨 ---
+  const fy=TRACKS.fx, fh=34;
+  tx.fillStyle='#1c1c23'; tx.fillRect(0,fy,w,fh);
+  [[12.34,'grain'],[14.1,'chroma'],[16.8,'glitch'],[19.0,'vignette'],[22.4,'flash']]
+  .forEach(([t,nm])=>{
+    const x=timeToX(t), ww=0.9*px;
+    if(x+ww<0||x>w) return;
+    tx.fillStyle='#3d3350'; tx.fillRect(x,fy+7,Math.max(3,ww),fh-14);
+    if(ww>40){tx.fillStyle='#b9a8d8';tx.font='9px monospace';tx.fillText(nm,x+4,fy+20);}
+  });
+
+  // 播放头
+  const pxh=timeToX(cur.t);
+  tx.strokeStyle='#ffffff'; tx.lineWidth=1;
+  tx.beginPath(); tx.moveTo(pxh,0); tx.lineTo(pxh,h); tx.stroke();
+  tx.fillStyle='#ffffff';
+  tx.beginPath(); tx.moveTo(pxh-5,0); tx.lineTo(pxh+5,0); tx.lineTo(pxh,7); tx.closePath(); tx.fill();
+}
+
+/* ================= 预览画布 ================= */
+const pv=document.getElementById('preview'), pc=pv.getContext('2d');
+const W=960,H=540;
+function fmt(t){const m=Math.floor(t/60),s=t-m*60;
+  return String(m).padStart(2,'0')+':'+s.toFixed(2).padStart(5,'0');}
+
+function drawPreview(){
+  const st=styles[cur.style];
+  // 定格量化
+  const q = cur.hold===1 ? cur.t : Math.floor(cur.t*(30/cur.hold))/(30/cur.hold);
+
+  pc.fillStyle=st.bg; pc.fillRect(0,0,W,H);
+
+  const L=lyrics.find(l=>q>=l.start&&q<l.end) || lyrics[0];
+  const idx=lyrics.indexOf(L);
+  const local=q-L.start, dur=L.end-L.start, prog=Math.min(1,local/dur);
+
+  // 节拍脉冲
+  const beatPh=(q/BEAT)%1, pulse=Math.pow(1-beatPh,3);
+  if(st.deco!=='noise'){
+    const g=pc.createRadialGradient(W/2,H/2,60,W/2,H/2,W*0.72);
+    g.addColorStop(0,`rgba(255,255,255,${0.03+pulse*0.05})`);
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    pc.fillStyle=g; pc.fillRect(0,0,W,H);
+  }
+
+  // 装饰层
+  pc.save();
+  if(st.deco==='rule'){
+    pc.strokeStyle='rgba(255,255,255,.16)'; pc.lineWidth=1;
+    pc.strokeRect(60,60,W-120,H-120);
+    pc.beginPath();pc.moveTo(60,H/2);pc.lineTo(140,H/2);
+    pc.moveTo(W-140,H/2);pc.lineTo(W-60,H/2);pc.stroke();
+  }else if(st.deco==='block'){
+    pc.fillStyle=st.acc+'22'; pc.fillRect(0,0,W*0.42,H);
+    pc.fillStyle=st.acc; pc.fillRect(W*0.42-2,0,3,H);
+  }else if(st.deco==='frame'){
+    pc.strokeStyle='rgba(0,0,0,.22)'; pc.lineWidth=2;
+    pc.strokeRect(48,48,W-96,H-96);
+    pc.strokeStyle=st.acc; pc.lineWidth=4;
+    pc.beginPath();pc.moveTo(48,48);pc.lineTo(148,48);pc.moveTo(48,48);pc.lineTo(48,148);pc.stroke();
+  }else if(st.deco==='grid'){
+    pc.strokeStyle=st.acc+'44'; pc.lineWidth=1;
+    for(let x=0;x<W;x+=40){pc.beginPath();pc.moveTo(x,0);pc.lineTo(x,H);pc.stroke();}
+    for(let y=0;y<H;y+=40){pc.beginPath();pc.moveTo(0,y);pc.lineTo(W,y);pc.stroke();}
+  }else if(st.deco==='noise'){
+    for(let i=0;i<420;i++){
+      const x=((Math.sin(i*17.3+q*13)*0.5+0.5)*W)|0, y=((Math.cos(i*11.7+q*7)*0.5+0.5)*H)|0;
+      pc.fillStyle=`rgba(255,255,255,${0.02+0.05*((i%7)/7)})`;
+      pc.fillRect(x,y,2,2);
+    }
+  }
+  pc.restore();
+
+  // 文字入场动画
+  const inDur=P.dur/100;
+  const e=Math.min(1,local/inDur), ev=EASES['expo.out'](e);
+  const cam=1+ (P.cam/100)*0.06*ev;
+
+  // 布局
+  let tx0=W/2, ty0=H/2, align='center';
+  if(st.layout==='left'){tx0=W*0.24;align='left';}
+  else if(st.layout==='topleft'){tx0=110;ty0=190;align='left';}
+  else if(st.layout==='scatter'){tx0=W/2;ty0=H/2;}
+
+  pc.save();
+  pc.translate(tx0,ty0); pc.scale(cam,cam);
+  pc.translate(0,(1-ev)*26);
+  pc.globalAlpha=ev;
+
+  pc.textAlign=align; pc.textBaseline='middle';
+  pc.font=`900 ${P.size}px "Noto Serif SC","Microsoft YaHei",serif`;
+  pc.lineJoin='round';
+  pc.lineWidth=P.stroke; pc.strokeStyle = st.deco==='frame' ? 'rgba(255,255,255,.9)' : '#000';
+  pc.strokeText(L.text,0,0);
+  pc.fillStyle=st.fg; pc.fillText(L.text,0,0);
+
+  // 色差重影
+  if(P.chrom>0){
+    pc.globalCompositeOperation='screen';
+    pc.globalAlpha=ev*(P.chrom/100)*0.55;
+    pc.fillStyle='#ff2d6f'; pc.fillText(L.text,-2*(P.chrom/20),0);
+    pc.fillStyle='#00e5ff'; pc.fillText(L.text, 2*(P.chrom/20),0);
+    pc.globalCompositeOperation='source-over';
+  }
+  pc.restore();
+
+  // 逐字高亮（K 值效果）
+  if(st.layout==='center'){
+    pc.textAlign='center'; pc.font=`900 ${P.size}px "Noto Serif SC",serif`;
+    const total=pc.measureText(L.text).width;
+    let x=W/2-total/2;
+    for(let i=0;i<L.text.length;i++){
+      const wch=pc.measureText(L.text[i]).width;
+      const kStart=L.start+dur*(i/L.text.length), kEnd=L.start+dur*((i+1)/L.text.length);
+      if(q>=kStart){
+        pc.fillStyle=st.acc;
+        pc.globalAlpha=0.9;
+        pc.fillRect(x, H/2+P.size*0.62, wch, 3);
+        pc.globalAlpha=1;
+      }
+      x+=wch;
+    }
+  }
+
+  // HUD：歌名 / 镜头号
+  pc.globalAlpha=.55; pc.textAlign='left'; pc.textBaseline='alphabetic';
+  pc.font='500 15px "Microsoft YaHei",sans-serif';
+  pc.fillStyle=st.fg; pc.fillText('残光 — NikusonP', 60, H-62);
+  pc.textAlign='right';
+  pc.font='600 15px monospace';
+  pc.fillText('S'+String(idx+1).padStart(3,'0')+' / 012', W-60, H-62);
+  pc.font='400 13px monospace';
+  pc.fillText(fmt(q)+'  ·  BPM '+BPM, W-60, H-40);
+  pc.globalAlpha=1;
+
+  // 后处理
+  if(P.grain>0){
+    for(let i=0;i<900*(P.grain/100);i++){
+      pc.fillStyle=`rgba(255,255,255,${0.025+Math.random()*0.05})`;
+      pc.fillRect(Math.random()*W,Math.random()*H,1,1);
+    }
+  }
+  if(P.scan>0){
+    pc.fillStyle=`rgba(0,0,0,${P.scan/100*0.35})`;
+    for(let y=0;y<H;y+=3) pc.fillRect(0,y,W,1);
+  }
+  if(P.vig>0){
+    const g=pc.createRadialGradient(W/2,H/2,H*0.28,W/2,H/2,H*0.78);
+    g.addColorStop(0,'rgba(0,0,0,0)');
+    g.addColorStop(1,`rgba(0,0,0,${P.vig/100*0.75})`);
+    pc.fillStyle=g; pc.fillRect(0,0,W,H);
+  }
+  // 安全框
+  pc.strokeStyle='rgba(255,255,255,.18)'; pc.lineWidth=1; pc.setLineDash([4,4]);
+  pc.strokeRect(W*0.05,H*0.05,W*0.9,H*0.9); pc.setLineDash([]);
+}
+
+/* ================= 交互 ================= */
+function syncUI(){
+  document.getElementById('tcDisp').textContent=fmt(cur.t);
+  document.getElementById('stFrame').textContent=Math.round(cur.t*30);
+  const si=lyrics.findIndex(l=>cur.t>=l.start&&cur.t<l.end);
+  document.getElementById('shotTxt').textContent='S'+String((si<0?0:si)+1).padStart(3,'0');
+  drawPreview(); drawTL();
+}
+
+let raf=null;
+function loop(){
+  if(!cur.playing) return;
+  cur.t+=1/60;
+  if(cur.t>DUR-40){cur.t=12.34;}
+  syncUI(); raf=requestAnimationFrame(loop);
+}
+document.getElementById('btnPlay').onclick=function(){
+  cur.playing=!cur.playing;
+  this.textContent=cur.playing?'⏸ 暂停':'▶ 播放';
+  if(cur.playing) loop(); else cancelAnimationFrame(raf);
+};
+
+// 时间轴点击/拖拽定位
+let dragging=false;
+function seek(e){
+  const r=tl.getBoundingClientRect();
+  cur.t=Math.max(0,Math.min(DUR,xToTime(e.clientX-r.left)));
+  syncUI();
+}
+tl.onmousedown=e=>{dragging=true;seek(e);};
+window.addEventListener('mousemove',e=>{if(dragging)seek(e);});
+window.addEventListener('mouseup',()=>dragging=false);
+SCROLL.addEventListener('wheel',e=>{
+  if(e.ctrlKey){e.preventDefault();
+    cur.zoom=Math.max(0.2,Math.min(4,cur.zoom*(e.deltaY<0?1.15:0.87)));
+    document.getElementById('zoom').value=Math.round(cur.zoom*100);
+    document.getElementById('zoomVal').textContent=cur.zoom.toFixed(1)+'×';
+    drawTL();}
+}, {passive:false});
+
+document.getElementById('zoom').oninput=function(){
+  cur.zoom=this.value/100;
+  document.getElementById('zoomVal').textContent=cur.zoom.toFixed(1)+'×';
+  drawTL();
+};
+
+// 定格档位
+[['fxReal',1],['fx2',2],['fx3',3]].forEach(([id,h])=>{
+  document.getElementById(id).onclick=function(){
+    ['fxReal','fx2','fx3'].forEach(x=>document.getElementById(x).classList.remove('on'));
+    this.classList.add('on'); cur.hold=h; drawPreview();
+    document.getElementById('zoomTxt').textContent = h===1?'适应':'定格';
+  };
+});
+
+// 一键换构图
+function roll(){
+  cur.style=(cur.style+1+Math.floor(Math.random()*(styles.length-1)))%styles.length;
+  cur.seed=Math.floor(Math.random()*99999);
+  document.getElementById('seedInput').value=cur.seed;
+  drawPreview();
+}
+document.getElementById('btnRoll').onclick=roll;
+document.getElementById('btnRoll2').onclick=roll;
+document.getElementById('btnLock').onclick=function(){
+  this.classList.toggle('primary');
+  this.textContent=this.classList.contains('primary')?'🔓 已锁定':'🔒 锁定镜头';
+};
+
+// 滑块绑定
+function bind(id,vid,fmtv,key){
+  const el=document.getElementById(id), lab=document.getElementById(vid);
+  el.oninput=function(){P[key]=+this.value; lab.textContent=fmtv(+this.value); drawPreview();};
+}
+bind('pSize','vSize',v=>v,'size');
+bind('pTrack','vTrack',v=>(v<0?'-':'')+Math.abs(v/100).toFixed(2).slice(1),'track');
+bind('pLead','vLead',v=>(v/100).toFixed(2),'lead');
+bind('pStroke','vStroke',v=>v,'stroke');
+bind('pDur','vDur',v=>'.'+String(v).padStart(2,'0'),'dur');
+bind('pCam','vCam',v=>'.'+String(v).padStart(2,'0'),'cam');
+bind('pGrain','vGrain',v=>'.'+String(v).padStart(2,'0'),'grain');
+bind('pChrom','vChrom',v=>'.'+String(v).padStart(2,'0'),'chrom');
+bind('pVig','vVig',v=>'.'+String(v).padStart(2,'0'),'vig');
+bind('pScan','vScan',v=>'.'+String(v).padStart(2,'0'),'scan');
+
+document.getElementById('easeSel').onchange=drawEase;
+
+// 色板
+document.querySelectorAll('.sw').forEach(s=>{
+  s.onclick=()=>{document.querySelectorAll('.sw').forEach(x=>x.classList.remove('on'));s.classList.add('on');};
+});
+// 标签筛选
+document.querySelectorAll('.tag').forEach(t=>{
+  t.onclick=()=>{document.querySelectorAll('.tag').forEach(x=>x.classList.remove('on'));t.classList.add('on');};
+});
+// 快捷键
+window.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  if(e.code==='Space'){e.preventDefault();document.getElementById('btnPlay').click();}
+  if(e.key==='r'||e.key==='R')roll();
+  if(e.key==='ArrowLeft'){cur.t=Math.max(0,cur.t-(e.shiftKey?BEAT:1/30));syncUI();}
+  if(e.key==='ArrowRight'){cur.t=Math.min(DUR,cur.t+(e.shiftKey?BEAT:1/30));syncUI();}
+});
+
+/* ---- 主题：light / dark / system，默认 dark ----
+   与岚珠工具箱 appearance.ts 同一套做法：改 <html> 的类 + CSS 变量，
+   不重新渲染 React 树、不做状态同步；顺带让原生控件（滚动条/输入框）跟着走。 */
+(function(){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  window.applyTheme = function(mode){
+    const dark = mode==='dark' || (mode==='system' && mq.matches);
+    THEME = dark ? 'dark' : 'light';
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    document.querySelectorAll('#themeSeg button')
+      .forEach(b => b.classList.toggle('on', b.dataset.th === mode));
+    syncUI();
+  };
+  document.querySelectorAll('#themeSeg button')
+    .forEach(b => { b.onclick = () => window.applyTheme(b.dataset.th); });
+  mq.addEventListener('change', () => {
+    const cur = document.querySelector('#themeSeg button.on');
+    if (cur && cur.dataset.th === 'system') window.applyTheme('system');
+  });
+  window.applyTheme('dark');
+})();
+
+window.addEventListener('resize',()=>{layoutTL();syncUI();});
+layoutTL(); drawEase(); syncUI();
+</script>
+</body>
+</html>

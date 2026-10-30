@@ -1,0 +1,4 @@
+// 由 CMake configure_file 生成到构建目录。
+// 为什么不用相对路径：windres 在构建目录下运行，相对路径 "app_icon.ico"
+// 会解析到 build/ 而不是源码的 res/，报 "preprocessing failed"。
+IDI_ICON1 ICON "@CMAKE_CURRENT_SOURCE_DIR@/res/app_icon.ico"

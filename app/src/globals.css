@@ -1,0 +1,548 @@
+@import 'tailwindcss';
+
+/*
+ * 设计令牌层 —— 与岚珠工具箱 / ShiorikoTrans 同一套做法。
+ *
+ * Tailwind v4 的写法：在 @theme 里把 CSS 变量注册成"工具类来源"，
+ * 之后就能直接用 bg-primary / text-muted-foreground 这些类。
+ * 改主题只需要改这一处变量，组件里一个颜色字面量都不写。
+ *
+ * 与岚珠唯一的区别是**默认深色**（index.html 给 <html> 预置了 .dark）：
+ * 这是个视频软件，长时间盯波形和预览，深底更省力。
+ */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* ── NLE 专用表面（AE / Vegas 那套"无缝面板拼接"的层次） ──
+   * 面板之间靠 1px 硬分隔线和明度差区分，不用圆角卡片 —— 
+   * 圆角卡片是网页语汇，一多就出戏。 */
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-rail: var(--rail);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-stage: var(--stage);
+  --color-timeline: var(--timeline);
+  --color-wave-up: var(--wave-up);
+  --color-wave-down: var(--wave-down);
+  --color-beat: var(--beat);
+  --color-playhead: var(--playhead);
+  --color-track-1: var(--track-1);
+  --color-track-2: var(--track-2);
+
+  /* 视频软件里数字必须对齐，所以等宽字体用得多 */
+  --font-sans: 'Microsoft YaHei UI', 'Microsoft YaHei', 'Segoe UI', -apple-system,
+    BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Cascadia Mono', Consolas, 'Courier New', ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-2xs: 0 1px 1px hsl(211 60% 11% / 0.06);
+  --shadow-xs: 0 1px 2px hsl(211 60% 11% / 0.08);
+  --shadow-sm: 0 4px 12px hsl(220 18% 16% / 0.05);
+  --shadow-md: 0 12px 28px hsl(220 18% 16% / 0.09);
+  --shadow-lg: 0 16px 36px hsl(220 10% 20% / 0.12);
+}
+
+/* ------------------------------------------------------------------ *
+ * 浅色主题
+ * ------------------------------------------------------------------ */
+:root {
+  --radius: 0.75rem;
+
+  --background: hsl(220 16% 96%);
+  --foreground: hsl(220 18% 15%);
+
+  --card: hsl(0 0% 100% / 0.95);
+  --card-foreground: hsl(220 18% 15%);
+
+  --popover: hsl(0 0% 100% / 0.98);
+  --popover-foreground: hsl(220 18% 15%);
+
+  /* 樱坂雫应援色 #01B7ED —— 取自岚珠 appearance.ts 的虹咲 13 人配色表 */
+  --primary: hsl(193 99% 46%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  --secondary: hsl(214 24% 92%);
+  --secondary-foreground: hsl(216 20% 22%);
+
+  --muted: hsl(214 22% 93%);
+  --muted-foreground: hsl(216 12% 42%);
+
+  --accent: hsl(210 40% 90%);
+  --accent-foreground: hsl(216 20% 22%);
+
+  --destructive: hsl(0 78% 57%);
+  --destructive-foreground: hsl(210 40% 98%);
+
+  --success: hsl(154 64% 36%);
+  --success-foreground: hsl(154 100% 96%);
+
+  --border: hsl(214 20% 84%);
+  --input: hsl(214 20% 84%);
+  --ring: hsl(193 99% 46%);
+
+  /*
+   * 恒深色表面：预览舞台与时间轴。
+   * 它们的底色是"内容"而不是"界面" —— 视频画面和音频波形从来都是画在深底上的，
+   * 跟着主题变浅会看不清，所以这两个表面两个主题下都保持深色。
+   * （Aegisub、Premiere、Audition 都是这么处理的）
+   */
+  --stage: hsl(240 12% 4%);
+  --timeline: hsl(240 10% 11%);
+  --timeline-line: hsl(240 8% 20%);
+  --wave-up: hsl(248 82% 68%);
+  --wave-down: hsl(193 99% 46%);
+  --beat: hsl(186 70% 55%);
+
+  --panel: hsl(220 14% 94%);
+  --panel-2: hsl(220 14% 90%);
+  --rail: hsl(220 14% 88%);
+  --line: hsl(214 18% 80%);
+  --line-2: hsl(214 18% 74%);
+  --playhead: hsl(348 90% 58%);
+  --track-1: hsl(193 60% 40%);
+  --track-2: hsl(266 45% 56%);
+}
+
+/* ------------------------------------------------------------------ *
+ * 深色主题（默认）
+ * ------------------------------------------------------------------ */
+.dark {
+  --background: hsl(240 10% 10%);
+  --foreground: hsl(240 10% 91%);
+
+  --card: hsl(240 10% 13% / 0.94);
+  --card-foreground: hsl(240 10% 91%);
+
+  --popover: hsl(240 10% 14% / 0.98);
+  --popover-foreground: hsl(240 10% 91%);
+
+  --secondary: hsl(240 8% 20%);
+  --secondary-foreground: hsl(240 8% 90%);
+
+  --muted: hsl(240 8% 18%);
+  --muted-foreground: hsl(240 7% 62%);
+
+  --accent: hsl(240 8% 22%);
+  --accent-foreground: hsl(240 10% 91%);
+
+  --destructive: hsl(0 62% 52%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --success: hsl(154 58% 52%);
+  --success-foreground: hsl(154 100% 96%);
+
+  --border: hsl(240 8% 22%);
+  --input: hsl(240 8% 24%);
+
+  /* 暗底上把水蓝提亮一档，否则会糊成一团（与岚珠"暗色下 l+16"同思路） */
+  --primary: hsl(193 100% 62%);
+  --primary-foreground: hsl(200 60% 8%);
+  --ring: hsl(193 100% 62%);
+
+  --stage: hsl(240 14% 3%);
+  --timeline: hsl(240 10% 12%);
+  --timeline-line: hsl(240 8% 18%);
+  --wave-up: hsl(248 82% 70%);
+  --wave-down: hsl(193 99% 50%);
+  --beat: hsl(186 65% 58%);
+
+  /*
+   * 五阶灰阶 —— AE 的层次感全在这五档里：
+   * rail(窗口最外) < panel(面板) < panel-2(面板内的凹槽) < ... 
+   * 相邻两档差 2~3% 明度，肉眼刚好能分层但不抢内容。
+   */
+  --panel: hsl(240 6% 13%);
+  --panel-2: hsl(240 6% 16%);
+  --rail: hsl(240 7% 10%);
+  --line: hsl(240 6% 20%);
+  --line-2: hsl(240 6% 26%);
+  --playhead: hsl(348 92% 62%);
+  --track-1: hsl(193 70% 46%);
+  --track-2: hsl(266 50% 58%);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    /* 桌面应用手感：界面文字不选中，只有输入区可以 */
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [data-selectable] {
+    user-select: text;
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(240 8% 32%);
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240 8% 40%);
+  }
+
+  /* 数字一律等宽，避免时间码跳动时宽度忽宽忽窄 */
+  .tnum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * NLE 骨架 —— 面板与控件
+ *
+ * 这些是「结构」不是「皮肤」，所以写成语义类而不是一堆内联 className：
+ * 36 个面板标题条如果各写一遍 padding，第一个改动就会漏掉一处。
+ * ------------------------------------------------------------------ */
+@layer components {
+  /* 面板：flex 列 + 内部可滚动，min-h-0 是滚动容器不漏高度的关键 */
+  .pnl {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+    background: var(--panel);
+  }
+
+  /* 面板标题条：AE 的 22px 紧凑条，右侧放小按钮 */
+  .pnl-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 23px;
+    flex: none;
+    padding: 0 4px 0 8px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted-foreground);
+    user-select: none;
+  }
+
+  /* 面板里的滚动区 */
+  .pnl-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* 列表行：22px 行高，整行可点 */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 8px;
+    font-size: 12px;
+    cursor: default;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .row:hover {
+    background: color-mix(in srgb, var(--foreground) 7%, transparent);
+  }
+  .row[data-on='true'] {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+
+  /* 属性行：左标签右控件，标签列固定宽 —— 检查器里最要紧的对齐 */
+  .field {
+    display: grid;
+    grid-template-columns: 78px 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 10px;
+    font-size: 12px;
+  }
+  .field > .lbl {
+    color: var(--muted-foreground);
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 输入控件统一形状（AE 那种内凹小方框） */
+  .inp {
+    height: 22px;
+    min-width: 0;
+    width: 100%;
+    padding: 0 6px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--rail);
+    color: var(--foreground);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    outline: none;
+  }
+  .inp:hover {
+    border-color: var(--line-2);
+  }
+  .inp:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 45%, transparent);
+  }
+  select.inp {
+    font-family: var(--font-sans);
+    padding-right: 2px;
+  }
+
+  /* 小按钮 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--panel-2);
+    color: var(--foreground);
+    font-size: 11.5px;
+    white-space: nowrap;
+    transition: background 90ms ease, border-color 90ms ease;
+  }
+  .btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 10%, var(--panel-2));
+    border-color: var(--line-2);
+  }
+  .btn:active:not(:disabled) {
+    background: color-mix(in srgb, var(--foreground) 16%, var(--panel-2));
+  }
+  .btn:disabled {
+    opacity: 0.4;
+  }
+  .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 85%, white);
+    border-color: color-mix(in srgb, var(--primary) 85%, white);
+  }
+
+  /* 分段控件（分辨率 100/50/25 这种） */
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--rail);
+  }
+  .seg > button {
+    flex: 1;
+    height: 20px;
+    padding: 0 7px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+  .seg > button:hover {
+    color: var(--foreground);
+  }
+  .seg > button[data-on='true'] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+  }
+
+  /* 菜单栏条目 */
+  .menuitem {
+    height: 100%;
+    padding: 0 9px;
+    font-size: 12px;
+    color: var(--foreground);
+    display: inline-flex;
+    align-items: center;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .menuitem:hover,
+  .menuitem[data-open='true'] {
+    background: color-mix(in srgb, var(--foreground) 12%, transparent);
+  }
+
+  /* 下拉菜单面板 */
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 60;
+    min-width: 208px;
+    padding: 4px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    background: var(--popover);
+    box-shadow: 0 12px 32px hsl(0 0% 0% / 0.45);
+  }
+  .dropdown > button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: left;
+    color: var(--foreground);
+  }
+  .dropdown > button:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .dropdown > button:disabled {
+    opacity: 0.35;
+  }
+  .dropdown .sep {
+    height: 1px;
+    margin: 4px 6px;
+    background: var(--line);
+  }
+  .dropdown .kbd {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    opacity: 0.5;
+  }
+
+  /* 数值滑块（AE 的蓝色细条） */
+  .rng {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 14px;
+    background: transparent;
+  }
+  .rng::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--line-2);
+  }
+  .rng::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px;
+    height: 11px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 1px solid color-mix(in srgb, var(--primary) 60%, black);
+  }
+
+  /* 工具栏：竖分隔线、弱标签、信息胶囊 */
+  .tb-sep {
+    width: 1px;
+    height: 16px;
+    flex: none;
+    background: var(--line);
+    margin: 0 2px;
+  }
+  .tb-label {
+    flex: none;
+    font-size: 10.5px;
+    color: var(--muted-foreground);
+    margin-right: 1px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 18px;
+    flex: none;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--panel-2);
+    color: var(--muted-foreground);
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+  .chip b {
+    color: var(--foreground);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+
+  /* 分隔拖手（面板之间 4px 的抓取区） */
+  .grip-x {
+    width: 4px;
+    flex: none;
+    cursor: col-resize;
+    background: var(--rail);
+  }
+  .grip-x:hover {
+    background: var(--primary);
+  }
+  .grip-y {
+    height: 4px;
+    flex: none;
+    cursor: row-resize;
+    background: var(--rail);
+  }
+  .grip-y:hover {
+    background: var(--primary);
+  }
+}
